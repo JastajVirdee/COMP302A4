@@ -1,3 +1,5 @@
+(* Jastaj Virdee - 260689027 *)
+
 (* Q1: A Rose by any Other Name Would Smell as Sweet *)
 
 type 'a rose_tree = Node of 'a * ('a rose_tree) list
@@ -8,23 +10,32 @@ exception BackTrack
 
 (* Q1.1 write a function that finds an element of the tree using backtracking with exceptions *)
 
-let rec find_e (p : 'a -> bool) (t : 'a rose_tree) : 'a option = match t with
-  | Node (a, []) -> if (p a) then Some(a) else raise BackTrack
-  | Node (a, children) -> if (p a) then Some(a) else
-    let rec check_children c = match c with
-      | h::t -> (try find_e p h with BackTrack -> check_children t)
-      | [] -> raise BackTrack
-    in check_children children
+let rec find_e (p : 'a -> bool) (t : 'a rose_tree) : 'a = (* Function with exceptions *)
+  match t with
+  | Node (a, []) -> if (p a) then
+                      a
+                    else
+                      raise BackTrack
+  | Node (a, children) -> if (p a) then
+                            a
+                          else
+                            let rec check_children c = match c with
+                              | h::t -> (try find_e p h with BackTrack -> check_children t)
+                              | [] -> raise BackTrack
+                            in check_children children
 
 (* Q1.1: write this function and it helper functions *)
-let find (p : 'a -> bool)  (t : 'a rose_tree) : 'a option = find_e p t
-
+let find (p : 'a -> bool)  (t : 'a rose_tree) : 'a option = (* call find_e and handle the exceptions *)
+  try Some (find_e p t) with BackTrack -> None
 
 (* Find with failure continuations *)
 
-let rec find_k (p : 'a -> bool) (t : 'a rose_tree) (k : unit -> 'a option) : 'a option = match t with
-  | (a, []) -> if (p a) then Some(a) else raise BackTrack
-  | (a, h::t) -> if (p a) then Some(a) else find_k p h (fun () -> t)
+let rec find_k (p : 'a -> bool) (t : 'a rose_tree) (k : unit -> 'a option) : 'a option = assert false
+(*
+match t with
+| (a, []) -> if (p a) then Some(a) else raise BackTrack
+| (a, h::t) -> if (p a) then Some(a) else find_k p h (fun () -> t)
+*)
 
 (* Q1.2: write this function and it helper functions *)
 let find' (p : 'a -> bool)  (t : 'a rose_tree) : 'a option = assert false (*  call find_k with the appropriate inital continuation *)
