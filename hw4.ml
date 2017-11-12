@@ -29,11 +29,11 @@ let find (p : 'a -> bool)  (t : 'a rose_tree) : 'a option = (* call find_e and h
 let rec find_k (p : 'a -> bool) (t : 'a rose_tree) (k : unit -> 'a option) : 'a option =
   match t with
     | Node (a, []) -> if (p a) then Some(a) else k ()
-    | Node (a, h::t) -> if (p a) then Some(a) else
+    | Node (a, children) -> if (p a) then Some(a) else
       let rec check_children c = match c with
         | h::t -> find_k p h (fun () -> check_children t)
-        | [] -> None
-      in check_children t
+        | [] -> k ()
+      in check_children children
 
 (* Q1.2: write this function and it helper functions *)
 let find' (p : 'a -> bool)  (t : 'a rose_tree) : 'a option = find_k p t (fun () -> None)
