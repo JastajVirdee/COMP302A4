@@ -41,17 +41,23 @@ let find' (p : 'a -> bool)  (t : 'a rose_tree) : 'a option = find_k p t (fun () 
 (* Find all with continuations *)
 
 let rec find_all_k  (p : 'a -> bool) (t : 'a rose_tree) (k : 'a list -> 'b) : 'b =
-  assert false
+  match t with
+    | Node (a, []) -> if (p a) then (k [a]) else k []
+    | Node (a, children) -> if (p a) then (k [a]) else
+      let rec check_children c = match c with
+        | h::t -> find_all_k p h (fun l -> (check_children t)@l) (*<-- This is sketchy*)
+        | [] -> k []
+      in check_children children
 
 (* Q1.3: write this function and it helper functions *)
-let find_all p t = assert false
+let find_all p t = find_all_k p t (fun [] -> [])
 
 (* An example to use *)
 
 let example = Node (7, [ Node (1, [])
-                         ; Node (2, [Node (16, [])])
-                         ; Node (4, [])
-                         ; Node (9, [])
+                         ; Node (15, [Node (6, [])])
+                         ; Node (15, [])
+                         ; Node (15, [])
                          ; Node (11, [])
                          ; Node (15, [])
                          ])
