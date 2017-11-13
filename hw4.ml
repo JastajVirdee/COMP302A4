@@ -43,27 +43,27 @@ let find' (p : 'a -> bool)  (t : 'a rose_tree) : 'a option = find_k p t (fun () 
 let rec find_all_k  (p : 'a -> bool) (t : 'a rose_tree) (k : 'a list -> 'b) : 'b =
   match t with
     | Node (a, []) -> if (p a) then (k [a]) else k []
-    | Node (a, children) -> if (p a) then (k [a]) else
-      let rec check_children c = match c with
-        | h::t -> find_all_k p h (fun l -> (check_children t)@l) (*<-- This is sketchy*)
-        | [] -> k []
-      in check_children children
+    | Node (a, children) ->
+       let rec check_children c = match c with
+         | h::t -> find_all_k p h (fun l -> (check_children t)@l) (*<-- This is sketchy*)
+         | [] -> k [] in
+       if (p a) then (check_children children)@(k [a])
+       else check_children children
 
 (* Q1.3: write this function and it helper functions *)
-let find_all p t = find_all_k p t (fun [] -> [])
+let find_all p t = find_all_k p t (fun l -> l)
 
 (* An example to use *)
 
 let example = Node (7, [ Node (1, [])
                          ; Node (15, [Node (6, [])])
                          ; Node (15, [])
-                         ; Node (15, [])
+                         ; Node (7, [])
                          ; Node (11, [])
                          ; Node (15, [])
                          ])
 
 let is_big x =  x > 10
-
 
 (* Q2 : Rational Numbers Two Ways *)
 
@@ -109,10 +109,68 @@ end
 
 (* Q2.1: Implement the Arith module using rational numbers (t = fraction) *)
 
-(* module FractionArith : Arith = *)
-(* struct *)
-(*   ... *)
-(* end *)
+let rec gcd (u : int) (v : int) : int =
+  if v <> 0 then (gcd v (u mod v))
+  else (abs u)
+
+let lcm (m : int) (n : int) : int  =
+  match m, n with
+  | 0, _ | _, 0 -> 0
+  | m, n -> abs (m * n) / (gcd m n)
+
+module FractionArith : Arith =
+struct
+  type t = fraction
+  let epsilon = (0,0)
+  let from_fraction (num, den) = (num, den)
+
+  let plus (n1, d1) (n2, d2) = if d1=d2 then (n1+n2, d1)
+                               else
+                                 let den = lcm d1 d2 in
+                                 let mult1 = den/d1 in
+                                 let mult2 = den/d2 in
+                                 (mult1*n1 + mult2*n2, den)
+  let minus (n1, d1) (n2, d2) = if d1=d2 then (n1-n2, d1)
+                                else
+                                  let den = lcm d1 d2 in
+                                  let mult1 = den/d1 in
+                                  let mult2 = den/d2 in
+                                  (mult1*n1 - mult2*n2, den)
+  let prod (n1, d1) (n2, d2) = (n1*n2, d1*d2)
+  let div (n1, d1) (n2, d2) = (n1*d2, n2*d1)
+  let abs (num, den) = (abs num, abs den)
+  let lt (n1, d1) (n2, d2) = if d1=d2 then n1 < n2
+                             else
+                               let den = lcm d1 d2 in
+                               let mult1 = den/d1 in
+                               let mult2 = den/d2 in
+                               mult1*n1 < mult2*n2
+  let le (n1, d1) (n2, d2) = if d1=d2 then n1 <= n2
+                             else
+                               let den = lcm d1 d2 in
+                               let mult1 = den/d1 in
+                               let mult2 = den/d2 in
+                               mult1*n1 < mult2*n2
+  let gt (n1, d1) (n2, d2)= if d1=d2 then n1 > n2
+                            else
+                              let den = lcm d1 d2 in
+                              let mult1 = den/d1 in
+                              let mult2 = den/d2 in
+                              mult1*n1 > mult2*n2
+  let ge (n1, d1) (n2, d2) = if d1=d2 then n1 >= n2
+                             else
+                               let den = lcm d1 d2 in
+                               let mult1 = den/d1 in
+                               let mult2 = den/d2 in
+                               mult1*n1 >= mult2*n2
+  let eq (n1, d1) (n2, d2) = if d1=d2 then n1 = n2
+                             else
+                               let den = lcm d1 d2 in
+                               let mult1 = den/d1 in
+                               let mult2 = den/d2 in
+                               mult1*n1 = mult2*n2
+  let to_string (num, den) = (string_of_int num)^"/"^(string_of_int den)
+end
 
 module type NewtonSolver =
   sig
