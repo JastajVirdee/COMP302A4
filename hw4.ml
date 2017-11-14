@@ -234,11 +234,17 @@ let rec take n z =
   else z.head::(take (n-1) (z.tail()))
 
 (* Q3.1: implement the function q as explained in the pdf *)
-let rec q z n = assert false
+let rec q z n = match n with
+  | 0 -> 1
+  | 1 -> nth z 1
+  | _ -> (nth z n) * (q z (n-1)) + (q z (n-2))  
 
 (* Q3.2: implement the function r as in the notes *)
-let rec r z n = assert false
-
+let rec r z n = match n with
+  | 0 -> float_of_int (nth z 0)
+  | _ -> match n mod 2 with
+    | 0 -> r z (n-1) -. 1. /. float_of_int ((q z n)*(q z (n-1)))
+    | _ -> r z (n-1) +. 1./. float_of_int ((q z n)*(q z (n-1)))
 (* Q3.3: implement the error function *)
 let error z n = assert false
 
