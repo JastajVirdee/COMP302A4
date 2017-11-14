@@ -185,8 +185,15 @@ module Newton (A : Arith) : (NewtonSolver with type t = A.t) =
 struct
  type t = A.t
 
- let rec findroot x acc approx = if (A.le (A.abs (A.minus x (A.prod approx approx))) acc) then approx
-   else findroot x acc (A.div (A.plus (A.div x approx)  approx) (A.from_fraction(2,1)))
+ let rec findroot x acc approx = 
+   let current_accuracy = (A.abs (A.minus x (A.prod approx approx))) in
+   if (A.le current_accuracy acc) then approx
+   else begin
+    let next_approx = (A.div (A.plus (A.div x approx)  approx) (A.from_fraction(2,1))) in
+      print_string(A.to_string(current_accuracy));
+      print_string("\n");
+      findroot x acc next_approx;
+    end
 
  let square_root n = findroot n A.epsilon (A.from_fraction(1,1));
  
@@ -199,11 +206,11 @@ end
 
 (* Examples *)
 
-(* module FloatNewton = Newton (FloatArith) *)
-(* module RationalNewton = Newton (FractionArith) *)
+(* module FloatNewton = Newton (FloatArith)
+module RationalNewton = Newton (FractionArith)
 
-(* let sqrt2 = FloatNewton.square_root (FloatArith.from_fraction (2, 1)) *)
-(* let sqrt2_r = RationalNewton.square_root (FractionArith.from_fraction (2, 1)) *)
+let sqrt2 = FloatNewton.square_root (FloatArith.from_fraction (2, 1))
+let sqrt2_r = RationalNewton.square_root (FractionArith.from_fraction (2, 1)) *)
 
 (* Q3 : Real Real Numbers, for Real! *)
 
