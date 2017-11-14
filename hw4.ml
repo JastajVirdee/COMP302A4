@@ -121,7 +121,7 @@ let lcm (m : int) (n : int) : int  =
 module FractionArith : Arith =
 struct
   type t = fraction
-  let epsilon = (0,0)
+  let epsilon = (1,1000000)
   let from_fraction (num, den) = (num, den)
 
   let plus (n1, d1) (n2, d2) = if d1=d2 then (n1+n2, d1)
@@ -180,6 +180,17 @@ module type NewtonSolver =
   end
 
 (* Q2.2: Implement a function that approximates the square root using  the Newton-Raphson method *)
+
+module Newton (A : Arith) : (NewtonSolver with type t = A.t) =
+struct
+ type t = A.t
+
+ let rec findroot x acc approx = if (A.le (A.abs (A.minus x (A.prod approx approx))) acc) then approx
+   else findroot x acc (A.div (A.plus (A.div x approx)  approx) (A.from_fraction(2,1)))
+
+ let square_root n = findroot n A.epsilon (A.from_fraction(1,1));
+ 
+end
 
 (* module Newton (A : Arith) : (NewtonSolver with type t = A.t) = *)
 (*   struct *)
