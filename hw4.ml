@@ -1,4 +1,5 @@
-(* Jastaj Virdee - 260689027 *)
+(*  Jastaj Virdee - 260689027  *)
+(*  Andrei Ungur  - 260690364  *)
 
 (* Q1: A Rose by any Other Name Would Smell as Sweet *)
 
@@ -190,8 +191,6 @@ struct
       let current_accuracy = (A.abs (A.minus next_approx approx)) in
         if (A.le current_accuracy acc) then next_approx else
         begin
-          print_string(A.to_string(current_accuracy));
-          print_string("\n");
           findroot x acc next_approx;
         end
 
@@ -240,6 +239,7 @@ let rec r z n = match n with
   | _ -> match n mod 2 with
     | 0 -> r z (n-1) -. 1. /. float_of_int ((q z n)*(q z (n-1)))
     | _ -> r z (n-1) +. 1./. float_of_int ((q z n)*(q z (n-1)))
+
 (* Q3.3: implement the error function *)
 let error z n = match n with
   | 0 -> let qn = float_of_int(q z n) in
@@ -259,25 +259,28 @@ let rat_of_real z approx =
 
 let real_of_int n = { head = n ; tail = fun () -> constant 0}
 
-(* Q3.5: implement a function that computes the real representation of a rational number   *)
-let rec real_of_rat r = assert false
 
+(* Q3.5: implement a function that computes the real representation of a rational number   *)
+let rec real_of_rat r = let floor_of_r = int_of_float(r) in
+  let rest_of_r = r -. float_of_int(floor_of_r) in
+  {head = floor_of_r ; tail = fun () -> if rest_of_r <= epsilon_float then (constant 0)
+    else real_of_rat(1. /. rest_of_r)}
 
 (* Examples *)
 
 (* Approximations of the  irrational numbers we have *)
-
-(* let sqrt_2_rat = rat_of_real sqrt2 1.e-5 *)
-(* let golden_ratio_rat = rat_of_real golden_ratio 1.e-5 *)
+(*
+let sqrt_2_rat = rat_of_real sqrt2 1.e-5
+let golden_ratio_rat = rat_of_real golden_ratio 1.e-5
 
 (* To test the representation of rationals we can try this *)
-(* let to_real_and_back n = rat_of_real (real_of_rat n) 0.0001 *)
+let to_real_and_back n = rat_of_real (real_of_rat n) 0.0001
 
 (* e1 should be very close to 10 (it is exactly 10 in the model solution) *)
-(* let e1 = to_real_and_back 10.0 *)
+let e1 = to_real_and_back 10.0
 
 (* this is the float approximation of pi, not the real number pi *)
-(* let not_pi = 2. *. acos 0. *)
+let not_pi = 2. *. acos 0.
 
 (* This should share the same 4 decimals with not_pi *)
-(* let not_pi' = to_real_and_back not_pi *)
+let not_pi' = to_real_and_back not_pi *)
