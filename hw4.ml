@@ -185,7 +185,7 @@ module Newton (A : Arith) : (NewtonSolver with type t = A.t) =
 struct
  type t = A.t
 
- let rec findroot x acc approx = 
+ let rec findroot x acc approx =
     let next_approx = (A.div (A.plus (A.div x approx)  approx) (A.from_fraction(2,1))) in
       let current_accuracy = (A.abs (A.minus next_approx approx)) in
         if (A.le current_accuracy acc) then next_approx else
@@ -196,21 +196,16 @@ struct
         end
 
  let square_root n = findroot n A.epsilon (A.from_fraction(1,1));
- 
-end
 
-(* module Newton (A : Arith) : (NewtonSolver with type t = A.t) = *)
-(*   struct *)
-(*     ... *)
-(*   end *)
+end
 
 (* Examples *)
 
-(* module FloatNewton = Newton (FloatArith)
+module FloatNewton = Newton (FloatArith)
 module RationalNewton = Newton (FractionArith)
 
 let sqrt2 = FloatNewton.square_root (FloatArith.from_fraction (2, 1))
-let sqrt2_r = RationalNewton.square_root (FractionArith.from_fraction (2, 1)) *)
+let sqrt2_r = RationalNewton.square_root (FractionArith.from_fraction (2, 1))
 
 (* Q3 : Real Real Numbers, for Real! *)
 
@@ -237,7 +232,7 @@ let rec take n z =
 let rec q z n = match n with
   | 0 -> 1
   | 1 -> nth z 1
-  | _ -> (nth z n) * (q z (n-1)) + (q z (n-2))  
+  | _ -> (nth z n) * (q z (n-1)) + (q z (n-2))
 
 (* Q3.2: implement the function r as in the notes *)
 let rec r z n = match n with
@@ -246,10 +241,21 @@ let rec r z n = match n with
     | 0 -> r z (n-1) -. 1. /. float_of_int ((q z n)*(q z (n-1)))
     | _ -> r z (n-1) +. 1./. float_of_int ((q z n)*(q z (n-1)))
 (* Q3.3: implement the error function *)
-let error z n = assert false
+let error z n = match n with
+  | 0 -> let qn = float_of_int(q z n) in
+         1.0 /. (qn *. qn)
+  | _ -> let qn = float_of_int(q z n) in
+         let qnminus1 = float_of_int(q z (n-1)) in
+         1.0 /. (qn *. (qn +. qnminus1))
 
 (* Q3.4: implement a function that computes a rational approximation of a real number *)
-let rat_of_real z approx = assert false
+let rat_of_real z approx =
+  let rec getApprox z approx n =
+    if (error z n) <= approx then
+      r z n
+    else
+      getApprox z approx (n+1)
+  in getApprox z approx 0
 
 let real_of_int n = { head = n ; tail = fun () -> constant 0}
 
