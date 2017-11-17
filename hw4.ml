@@ -46,7 +46,7 @@ let rec find_all_k  (p : 'a -> bool) (t : 'a rose_tree) (k : 'a list -> 'b) : 'b
     | Node (a, []) -> if (p a) then (k [a]) else k []
     | Node (a, children) ->
        let rec check_children c = match c with
-         | h::t -> find_all_k p h (fun l -> (check_children t)@l) (*<-- This is sketchy*)
+         | h::t -> find_all_k p h (fun l -> (check_children t)@l)
          | [] -> k [] in
        if (p a) then (check_children children)@(k [a])
        else check_children children
@@ -236,17 +236,22 @@ let rec q z n = match n with
 (* Q3.2: implement the function r as in the notes *)
 let rec r z n = match n with
   | 0 -> float_of_int (nth z 0)
-  | _ -> match n mod 2 with
-    | 0 -> r z (n-1) -. 1. /. float_of_int ((q z n)*(q z (n-1)))
-    | _ -> r z (n-1) +. 1./. float_of_int ((q z n)*(q z (n-1)))
+  | _ -> let denominator = float_of_int ((q z n)*(q z (n-1))) in
+    if denominator = 0. then (r z (n-1)) else
+    match n mod 2 with
+      | 0 -> r z (n-1) -. 1. /. denominator
+      | _ -> r z (n-1) +. 1./. denominator
 
 (* Q3.3: implement the error function *)
-let error z n = match n with
-  | 0 -> let qn = float_of_int(q z n) in
-         1.0 /. (qn *. qn)
-  | _ -> let qn = float_of_int(q z n) in
-         let qnminus1 = float_of_int(q z (n-1)) in
-         1.0 /. (qn *. (qn +. qnminus1))
+ let rec error z n = 
+   let qn = float_of_int(q z n) in
+   (* If we encounter a 0, our stream represents a finite number
+    * so our current estimation is as accurate as possible. *)
+   if qn = 0. then 0. else
+   match n with
+    | 0 -> 1.0 /. (qn *. qn)
+    | _ -> let qnminus1 = float_of_int(q z (n-1)) in
+           1.0 /. (qn *. (qn +. qnminus1))
 
 (* Q3.4: implement a function that computes a rational approximation of a real number *)
 let rat_of_real z approx =
@@ -269,7 +274,7 @@ let rec real_of_rat r = let floor_of_r = int_of_float(r) in
 (* Examples *)
 
 (* Approximations of the  irrational numbers we have *)
-(*
+
 let sqrt_2_rat = rat_of_real sqrt2 1.e-5
 let golden_ratio_rat = rat_of_real golden_ratio 1.e-5
 
@@ -283,4 +288,4 @@ let e1 = to_real_and_back 10.0
 let not_pi = 2. *. acos 0.
 
 (* This should share the same 4 decimals with not_pi *)
-let not_pi' = to_real_and_back not_pi *)
+let not_pi' = to_real_and_back not_pi
